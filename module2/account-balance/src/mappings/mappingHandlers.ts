@@ -6,15 +6,15 @@ export async function handleEvent(event: SubstrateEvent): Promise<void> {
 
     const {event: {data: [account, balance]}} = event;
     
-    //Create a new Account entity with ID using block hash
-    let record = new Account(event.extrinsic.block.block.header.hash.toString());
-    
-    // Assign the Polkadot address to the account field
-    record.account = account.toString();
-    
-    // Assign the balance to the balance field "type cast as Balance"
-    record.balance = (balance as Balance).toBigInt();
-    
-    await record.save();
+    let targetAccount = await Account.get(account.toString());
+    if (!targetAccount) {
+        targetAccount = new Account(event.extrinsic.block.block.header.hash.toString());
+        targetAccount.account = account.toString();
+        targetAccount.balance = (balance as Balance).toBigInt();
+        targetAccount.lastDepositAmount = targetAccount.balance;
+    } else {
+        targetAccount.balance += (balance as Balance).toBigInt();
+        targetAccount.lastDepositAmount = (balance as Balance).toBigInt();
+    }
+    await targetAccount.save();
 }
-

@@ -5,5 +5,6 @@ type Account @entity {
   account: String #Polkadot address
 
   balance: BigInt #Amount of DOT
-
+  
+  lastDepositAmount: BigInt #Amount of last deposit in DOT
 }
